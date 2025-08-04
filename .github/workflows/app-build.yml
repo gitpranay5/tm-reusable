@@ -50,7 +50,7 @@ jobs:
 
           - name: Upload Python artifacts
             if: ${{ inputs.language == 'python' }}
-            uses: actions/upload-artifact@v2
+            uses: actions/upload-artifact@v4
             with:
               name: python-artifacts
               path: |
@@ -61,7 +61,7 @@ jobs:
 
           - name: Upload Java artifacts
             if: ${{ inputs.language == 'java' }}
-            uses: actions/upload-artifact@v2
+            uses: actions/upload-artifact@v4
             with:
               name: java-artifacts
               path: |
