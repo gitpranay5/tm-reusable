@@ -29,13 +29,13 @@ jobs:
               
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'python' }}
-              uses: ./actions/build-python
+              uses: ./.github/actions/build-python
               with:
                 version: ${{ inputs.version }}
             
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'java' }}
-              uses: ./actions/build-java
+              uses: ./.github/actions/build-java
               with:
                 version: ${{ inputs.version }}
                 distribution: ${{ inputs.distribution }}
