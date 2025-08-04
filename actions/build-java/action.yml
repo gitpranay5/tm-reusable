@@ -1,6 +1,7 @@
 # This is a composite action for building Java applications
 
 name: Build Java Application
+description: 'Composite action for building Java applications'
 
 inputs:
   version:
@@ -9,7 +10,7 @@ inputs:
     default: '1.0.0'
   distribution:
     description: 'The distribution of the Java application'
-    required: true
+    required: false
     default: 'temurin'
 
 runs:

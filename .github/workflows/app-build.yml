@@ -16,7 +16,7 @@ on:
         description: 'The distribution of the application (if applicable)'
         required: false
         type: string
-        default: ''
+        default: 'temurin'
 
 jobs:
     build-application:
@@ -29,13 +29,13 @@ jobs:
               
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'python' }}
-              uses: ./.github/actions/build-python.yml
+              uses: ./.github/actions/build-python/action.yml
               with:
                 version: ${{ inputs.version }}
             
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'java' }}
-              uses: ./.github/actions/build-java.yml
+              uses: ./.github/actions/build-java/action.yml
               with:
                 version: ${{ inputs.version }}
                 distribution: ${{ inputs.distribution }}
@@ -45,6 +45,9 @@ jobs:
         needs: build-application
         runs-on: ubuntu-latest
         steps:
+          - name: Checkout code
+            uses: actions/checkout@v3
+
           - name: Upload Python artifacts
             if: ${{ inputs.language == 'python' }}
             uses: actions/upload-artifact@v2
