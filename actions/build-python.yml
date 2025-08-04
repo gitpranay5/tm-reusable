@@ -1,0 +1,29 @@
+# This is a composite action for building Python applications
+
+name: Build Python Application
+
+inputs:
+  version:
+    description: 'The version of the Python application'
+    required: true
+    default: '3.8'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.version }}
+    - name: set up python virtual environment and install dependencies
+      shell: bash
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        python -m pip install --upgrade pip
+
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          echo "requirements.txt not found"; exit 1
+        fi

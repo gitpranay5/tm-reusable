@@ -1,0 +1,67 @@
+# This is a GitHub Actions workflow file for building an application
+name: Build and upload artifacts
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        description: 'The programming language of the application'
+        required: true
+        type: string
+      version:
+        description: 'The version of the application'
+        required: true
+        type: string
+      distribution:
+        description: 'The distribution of the application (if applicable)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+    build-application:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - run: echo "Building application for ${{ inputs.language }} version ${{ inputs.version }}"
+              
+            - name: Set up environment for ${{ inputs.language }}
+              if: ${{ inputs.language == 'python' }}
+              uses: ./.github/actions/build-python.yml
+              with:
+                version: ${{ inputs.version }}
+            
+            - name: Set up environment for ${{ inputs.language }}
+              if: ${{ inputs.language == 'java' }}
+              uses: ./.github/actions/build-java.yml
+              with:
+                version: ${{ inputs.version }}
+                distribution: ${{ inputs.distribution }}
+
+
+    upload-artifacts:
+        needs: build-application
+        runs-on: ubuntu-latest
+        steps:
+          - name: Upload Python artifacts
+            if: ${{ inputs.language == 'python' }}
+            uses: actions/upload-artifact@v2
+            with:
+              name: python-artifacts
+              path: |
+                  venv/lib/python${{ inputs.version }}/site-packages
+                  venv/bin
+                  venv/lib/python${{ inputs.version }}/dist-packages
+                    echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
+
+          - name: Upload Java artifacts
+            if: ${{ inputs.language == 'java' }}
+            uses: actions/upload-artifact@v2
+            with:
+              name: java-artifacts
+              path: |
+                  target/*.jar
+                  target/*.war
+                    echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
