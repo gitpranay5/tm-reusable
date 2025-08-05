@@ -65,6 +65,7 @@ jobs:
             with:
               name: java-artifacts
               path: |
-                  target/*.jar
-                  target/*.war
+                  java/target/*.jar
+                  java/target/*.war
+                  java/target/*.pom
                     echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
