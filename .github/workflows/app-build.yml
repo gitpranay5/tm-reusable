@@ -29,13 +29,13 @@ jobs:
               
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'python' }}
-              uses: gitpranay5/tm-reusable/actions/build-python
+              uses: gitpranay5/tm-reusable/actions/build-python@main
               with:
                 version: ${{ inputs.version }}
             
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'java' }}
-              uses: gitpranay5/tm-reusable/actions/build-java
+              uses: gitpranay5/tm-reusable/actions/build-java@main
               with:
                 version: ${{ inputs.version }}
                 distribution: ${{ inputs.distribution }}
