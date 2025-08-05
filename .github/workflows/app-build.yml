@@ -64,8 +64,7 @@ jobs:
             uses: actions/upload-artifact@v4
             with:
               name: java-artifacts
-              path: |
-                  java/target/*.jar
-                  java/target/*.war
-                  java/target/*.pom
-                    echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
+              path: java/target/*.jar
+              
+          - name: Log build completion
+            run: echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
