@@ -41,8 +41,9 @@ jobs:
                     venv/lib/python${{ inputs.version }}/site-packages
                     venv/bin
                     venv/lib/python${{ inputs.version }}/dist-packages
-            - name: Log build completion
-              run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
+                    echo "Python artifacts uploaded successfully"
+           # - name: Log build completion
+           #   run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
 
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'java' }}
@@ -57,8 +58,8 @@ jobs:
                 name: java-artifacts
                 path: java/target/*.jar
                 
-            - name: Log build completion
-              run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
+           # - name: Log build completion
+           #   run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
 
 
     download-artifacts:
@@ -80,8 +81,9 @@ jobs:
                   venv/lib/python${{ inputs.version }}/site-packages
                   venv/bin
                   venv/lib/python${{ inputs.version }}/dist-packages
-          - name: Log build completion
-            run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
+                  echo "Python artifacts downloaded successfully"
+         # - name: Log build completion
+         #   run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
 
           - name: Download Java artifacts
             if: ${{ inputs.language == 'java' }}
@@ -90,5 +92,5 @@ jobs:
               name: java-artifacts
               path: java/target/*.jar
               
-          - name: Log build completion
-            run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
+         # - name: Log build completion
+         #   run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
