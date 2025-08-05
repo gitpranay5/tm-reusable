@@ -32,39 +32,63 @@ jobs:
               uses: gitpranay5/tm-reusable/actions/build-python@main
               with:
                 version: ${{ inputs.version }}
-            
+            - name: Upload Python artifacts
+              if: ${{ inputs.language == 'python' }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: python-artifacts
+                path: |
+                    venv/lib/python${{ inputs.version }}/site-packages
+                    venv/bin
+                    venv/lib/python${{ inputs.version }}/dist-packages
+            - name: Log build completion
+              run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
+
             - name: Set up environment for ${{ inputs.language }}
               if: ${{ inputs.language == 'java' }}
               uses: gitpranay5/tm-reusable/actions/build-java@main
               with:
                 version: ${{ inputs.version }}
                 distribution: ${{ inputs.distribution }}
+            - name: Upload Java artifacts
+              if: ${{ inputs.language == 'java' }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: java-artifacts
+                path: java/target/*.jar
+                
+            - name: Log build completion
+              run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
 
 
-    upload-artifacts:
+    download-artifacts:
         needs: build-application
         runs-on: ubuntu-latest
         steps:
           - name: Checkout code
             uses: actions/checkout@v3
 
-          - name: Upload Python artifacts
+          - name: Download Python artifacts
             if: ${{ inputs.language == 'python' }}
-            uses: actions/upload-artifact@v4
+            uses: actions/download-artifact@v4
             with:
               name: python-artifacts
               path: |
                   venv/lib/python${{ inputs.version }}/site-packages
                   venv/bin
                   venv/lib/python${{ inputs.version }}/dist-packages
-                    echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
+                  venv/lib/python${{ inputs.version }}/site-packages
+                  venv/bin
+                  venv/lib/python${{ inputs.version }}/dist-packages
+          - name: Log build completion
+            run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
 
-          - name: Upload Java artifacts
+          - name: Download Java artifacts
             if: ${{ inputs.language == 'java' }}
-            uses: actions/upload-artifact@v4
+            uses: actions/download-artifact@v4
             with:
               name: java-artifacts
               path: java/target/*.jar
               
           - name: Log build completion
-            run: echo "Build completed for ${{ inputs.language }} version ${{ inputs.version }}"
+            run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
