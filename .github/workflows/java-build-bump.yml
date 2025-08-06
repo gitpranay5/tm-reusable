@@ -1,0 +1,84 @@
+# This is a Java build and version bump workflow
+
+name: Java Build and Version Bump
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                description: 'The version of the Java application'
+                required: true
+                type: string
+                
+            distribution:
+                description: 'The distribution of the Java application (if applicable)'
+                required: false
+                default: 'temurin'
+                type: string
+
+jobs:
+    get-version: # Get the current version of pom.xml 
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Get current version from pom.xml
+              id: get-version
+              run: |
+                cd java || exit 0
+                if [ -f pom.xml ]; then
+                  POM_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+                  echo "Current version is $POM_VERSION"
+                  echo "POM_VERSION=$POM_VERSION" >> $GITHUB_OUTPUT
+                else
+                  echo "No pom.xml found, skipping version extraction"
+                fi
+    
+    build-java: # Build the Java application
+        runs-on: ubuntu-latest
+        needs: get-version
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Build Java application
+              uses: gitpranay5/tm-reusable/actions/build-java@main
+              with:
+                version: ${{ inputs.version }}
+                distribution: ${{ inputs.distribution }}
+            - name: Upload Java artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: java-artifact-${{ needs.get-version.outputs.POM_VERSION }}
+                path: java/target/*.jar
+                  echo "Java artifacts uploaded successfully"
+    
+    bump-pom-version: # Bump the version in pom.xml
+        runs-on: ubuntu-latest
+        needs: build-java
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Bump version in pom.xml
+              run: |
+                cd java || exit 0
+                NEW_VERSION=$(echo "${{ needs.get-version.outputs.POM_VERSION }}" | awk -F. { OFS=".";
+                    major=$1; minor=$2; patch=$3;
+                    if (patch < 9) {
+                        patch++;
+                    } else if (minor < 9) {
+                        minor++; patch=0;
+                    } else {
+                        major++; minor=0; patch=0;
+                    }
+                    print $major, $minor, $patch
+                }')
+
+            - name: Commit and push changes
+              run: |
+                git add .
+                git commit -m "Bump version to $NEW_VERSION"
+                git pull origin ${{ github.ref }}
+                git push origin ${{ github.ref }}
