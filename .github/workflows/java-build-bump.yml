@@ -74,6 +74,7 @@ jobs:
                     }
                     print $major, $minor, $patch
                 }')
+                mvn versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
 
             - name: Commit and push changes
               run: |
