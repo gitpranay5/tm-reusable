@@ -74,11 +74,13 @@ jobs:
                     }
                     print $major, $minor, $patch
                 }')
-                mvn versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
+                mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
 
             - name: Commit and push changes
               run: |
-                git add .
-                git commit -m "Bump version to $NEW_VERSION"
-                git pull origin ${{ github.ref }}
+                git config --global user.email "ex@gmail.com"
+                git config --global user.name "Pranay Jujjuri"
+                git add pom.xml
+                git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
+                git pull origin ${{ github.ref }} --rebase
                 git push origin ${{ github.ref }}
