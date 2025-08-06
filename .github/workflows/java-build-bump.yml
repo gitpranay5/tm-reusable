@@ -63,9 +63,12 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Bump version in pom.xml
+              id: bump-version
+              env:
+                CURRENT_VERSION: ${{ needs.get-version.outputs.VERSION }}
               run: |
                 cd java || exit 0
-                NEW_VERSION=$(echo "${{ needs.get-version.outputs.VERSION }}" | awk -F. '{ OFS=".";
+                NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{ OFS=".";
                     major=$1; minor=$2; patch=$3;
                     if (patch < 9) {
                         patch++;
@@ -76,15 +79,19 @@ jobs:
                     }
                     print major, minor, patch
                 }')
+                echo "new version is: $NEW_VERSION"
+                echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
 
             - name: Commit and push changes
               run: |
                 cd java || exit 0
+                git fetch origin ${{ github.ref_name }}
+                git checkout ${{ github.ref_name }}
+
                 git config --global user.email "ex@gmail.com"
                 git config --global user.name "Pranay Jujjuri"
                 git add pom.xml
                 git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
-                git pull origin HEAD:${{ github.ref_name }} --rebase
-                git push origin HEAD:${{ github.ref_name }}
+                git push origin ${{ github.ref_name }}
 
