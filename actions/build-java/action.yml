@@ -7,7 +7,7 @@ inputs:
   version:
     description: 'The version of the Java application'
     required: true
-    default: '1.0.0'
+    default: '17'
   distribution:
     description: 'The distribution of the Java application'
     required: false
