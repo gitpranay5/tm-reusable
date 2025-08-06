@@ -52,7 +52,6 @@ jobs:
               with:
                 name: java-artifact-${{ needs.get-version.outputs.POM_VERSION }}
                 path: java/target/*.jar
-                  echo "Java artifacts uploaded successfully"
     
     bump-pom-version: # Bump the version in pom.xml
         runs-on: ubuntu-latest
@@ -64,7 +63,7 @@ jobs:
             - name: Bump version in pom.xml
               run: |
                 cd java || exit 0
-                NEW_VERSION=$(echo "${{ needs.get-version.outputs.POM_VERSION }}" | awk -F. { OFS=".";
+                NEW_VERSION=$(echo "${{ needs.get-version.outputs.POM_VERSION }}" | awk -F. '{ OFS=".";
                     major=$1; minor=$2; patch=$3;
                     if (patch < 9) {
                         patch++;
