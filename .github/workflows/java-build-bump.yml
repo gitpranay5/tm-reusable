@@ -19,6 +19,8 @@ on:
 jobs:
     get-version: # Get the current version of pom.xml 
         runs-on: ubuntu-latest
+        outputs:
+            VERSION: ${{ steps.get-version.outputs.VERSION }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -30,7 +32,7 @@ jobs:
                 if [ -f pom.xml ]; then
                   POM_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
                   echo "Current version is $POM_VERSION"
-                  echo "POM_VERSION=$POM_VERSION" >> $GITHUB_OUTPUT
+                  echo "VERSION=$POM_VERSION" >> $GITHUB_OUTPUT
                 else
                   echo "No pom.xml found, skipping version extraction"
                 fi
@@ -50,7 +52,7 @@ jobs:
             - name: Upload Java artifacts
               uses: actions/upload-artifact@v4
               with:
-                name: java-artifact-${{ needs.get-version.outputs.POM_VERSION }}
+                name: java-artifact-${{ needs.get-version.outputs.VERSION }}
                 path: java/target/*.jar
     
     bump-pom-version: # Bump the version in pom.xml
@@ -63,7 +65,7 @@ jobs:
             - name: Bump version in pom.xml
               run: |
                 cd java || exit 0
-                NEW_VERSION=$(echo "${{ needs.get-version.outputs.POM_VERSION }}" | awk -F. '{ OFS=".";
+                NEW_VERSION=$(echo "${{ needs.get-version.outputs.VERSION }}" | awk -F. '{ OFS=".";
                     major=$1; minor=$2; patch=$3;
                     if (patch < 9) {
                         patch++;
@@ -72,7 +74,7 @@ jobs:
                     } else {
                         major++; minor=0; patch=0;
                     }
-                    print $major, $minor, $patch
+                    print major, minor, patch
                 }')
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
 
@@ -83,5 +85,6 @@ jobs:
                 git config --global user.name "Pranay Jujjuri"
                 git add pom.xml
                 git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
-                git pull origin ${{ github.ref }} --rebase
-                git push origin ${{ github.ref }}
+                git pull origin HEAD:${{ github.ref_name }} --rebase
+                git push origin HEAD:${{ github.ref_name }}
+
