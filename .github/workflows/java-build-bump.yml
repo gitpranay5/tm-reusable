@@ -85,6 +85,7 @@ jobs:
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
 
             - name: Commit and push changes
+              if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
               run: |
                 cd java || exit 0
                 git fetch origin ${{ github.head_ref }}
