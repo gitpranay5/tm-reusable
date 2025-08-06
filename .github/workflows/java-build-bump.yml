@@ -78,6 +78,7 @@ jobs:
 
             - name: Commit and push changes
               run: |
+                cd java || exit 0
                 git config --global user.email "ex@gmail.com"
                 git config --global user.name "Pranay Jujjuri"
                 git add pom.xml
