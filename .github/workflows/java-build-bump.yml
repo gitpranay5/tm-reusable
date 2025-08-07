@@ -28,9 +28,9 @@ jobs:
             - name: Get current version from pom.xml
               id: get-version
               run: |
-                chmod +x ./scripts/get-pom-version.sh
-                ./scripts/get-pom-version.sh
-    
+                chmod +x gitpranay5/tm-reusable/scripts/get-pom-version.sh
+                ./gitpranay5/tm-reusable/scripts/get-pom-version.sh
+
     build-java: # Build the Java application
         runs-on: ubuntu-latest
         needs: get-version
@@ -61,8 +61,8 @@ jobs:
             - name: Bump version in pom.xml
               id: bump-version
               run: |
-                chmod +x ./scripts/bump-pom-version.sh
-                NEW_VERSION=$(./scripts/bump-pom-version.sh $CURRENT_VERSION)
+                chmod +x gitpranay5/tm-reusable/scripts/bump-pom-version.sh
+                NEW_VERSION=$(./gitpranay5/tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION)
                 echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
            # - name: Commit and push changes
