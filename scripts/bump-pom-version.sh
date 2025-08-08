@@ -3,7 +3,6 @@
 #!/bin/bash
 
 cd java || exit 0
-echo " Current version is: $CURRENT_VERSION "
 NEW_VERSION=$(echo "$CURRENT_VERSION" | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' | awk -F. '{ OFS=".";
         major=$1; minor=$2; patch=$3;
         if (patch < 9) {
