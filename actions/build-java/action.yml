@@ -7,19 +7,15 @@ inputs:
   version:
     description: 'The version of the Java application'
     required: true
-    default: '17'
   distribution:
     description: 'The distribution of the Java application'
-    required: false
-    default: 'temurin'
+    required: true
   project_dir:
     description: 'The directory containing the Java project'
     required: true
-    default: 'java'
   project_file:
     description: 'The main project file (pom.xml or build.gradle)'
     required: true
-    default: 'pom.xml'
 
 runs:
   using: 'composite'
