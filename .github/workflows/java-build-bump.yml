@@ -63,14 +63,10 @@ jobs:
                 CURRENT_VERSION: ${{ needs.get-version.outputs.VERSION }}
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Checkout reusable workflow code
-              uses: actions/checkout@v4
+              uses: gitpranay5/tm-reusable/actions/checkout-caller-reusable@feature
               with:
                 repository: gitpranay5/tm-reusable
-                ref: ${{ github.head_ref }}
-                path: tm-reusable  
+                ref: feature
 
             - name: Bump version in pom.xml
               id: bump-version
