@@ -22,15 +22,11 @@ jobs:
         outputs:
             VERSION: ${{ steps.get-version.outputs.VERSION }}
         steps:
-            - name: Checkout caller code
-              uses: actions/checkout@v4
-              
-            - name: Checkout reusable workflow code
-              uses: actions/checkout@v4
+            - name: Checkout caller and reusable code
+              uses: gitpranay5/tm-reusable/actions/checkout-caller-reusable@feature
               with:
                 repository: gitpranay5/tm-reusable
                 ref: feature
-                path: tm-reusable
 
             - name: Get current version from pom.xml
               id: get-version
@@ -72,10 +68,10 @@ jobs:
               id: bump-version
               run: |
                 chmod +x tm-reusable/scripts/bump-pom-version.sh
-                NEW_VERSION=$(./tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION | tee /dev/stderr)
-                echo "NEW_VERSION=$NEW_VERSION"
+                NEW_VERSION=$(./tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION )
                 echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
+            - run: echo "$NEW_VERSION"
            
            # - name: Commit and push changes
            #   if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
