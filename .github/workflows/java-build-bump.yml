@@ -28,8 +28,8 @@ jobs:
             - name: Get current version from pom.xml
               id: get-version
               run: |
-                chmod +x gitpranay5/tm-reusable/scripts/get-pom-version.sh
-                ./gitpranay5/tm-reusable/scripts/get-pom-version.sh
+                chmod +x scripts/get-pom-version.sh
+                ./scripts/get-pom-version.sh
 
     build-java: # Build the Java application
         runs-on: ubuntu-latest
