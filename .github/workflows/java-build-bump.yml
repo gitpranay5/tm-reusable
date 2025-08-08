@@ -22,14 +22,20 @@ jobs:
         outputs:
             VERSION: ${{ steps.get-version.outputs.VERSION }}
         steps:
-            - name: Checkout code
+            - name: Checkout caller code
               uses: actions/checkout@v4
+              
+            - name: Checkout reusable workflow code
+              uses: actions/checkout@v4
+              with:
+                repository: gitpranay5/tm-reusable
+                path: tm-reusable
 
             - name: Get current version from pom.xml
               id: get-version
               run: |
-                chmod +x scripts/get-pom-version.sh
-                ./scripts/get-pom-version.sh
+                chmod +x tm-reusable/scripts/get-pom-version.sh
+                ./tm-reusable/scripts/get-pom-version.sh
 
     build-java: # Build the Java application
         runs-on: ubuntu-latest
@@ -58,11 +64,17 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Checkout reusable workflow code
+              uses: actions/checkout@v4
+              with:
+                repository: gitpranay5/tm-reusable
+                path: tm-reusable  
+
             - name: Bump version in pom.xml
               id: bump-version
               run: |
-                chmod +x gitpranay5/tm-reusable/scripts/bump-pom-version.sh
-                NEW_VERSION=$(./gitpranay5/tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION)
+                chmod +x tm-reusable/scripts/bump-pom-version.sh
+                NEW_VERSION=$(./tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION)
                 echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
            # - name: Commit and push changes
