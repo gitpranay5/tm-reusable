@@ -2,11 +2,10 @@
 
 #!/bin/bash
 
-cd java || exit 0
-if [ -f pom.xml ]; then
-POM_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
-echo "Current version is $POM_VERSION"
-echo "VERSION=$POM_VERSION" >> $GITHUB_OUTPUT
+cd $1 || exit 0
+if [ -f $2 ]; then
+    POM_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+    echo "$POM_VERSION"
 else
-echo "No pom.xml found, skipping version extraction"
+    echo "No pom.xml found, skipping version extraction"
 fi

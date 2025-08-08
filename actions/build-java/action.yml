@@ -12,6 +12,14 @@ inputs:
     description: 'The distribution of the Java application'
     required: false
     default: 'temurin'
+  project_dir:
+    description: 'The directory containing the Java project'
+    required: true
+    default: 'java'
+  project_file:
+    description: 'The main project file (pom.xml or build.gradle)'
+    required: true
+    default: 'pom.xml'
 
 runs:
   using: 'composite'
@@ -28,9 +36,20 @@ runs:
     - name: install dependencies and build Java application
       shell: bash
       run: |
-        if [ -f java/pom.xml ]; then
-          cd java
-          mvn clean install
+        if [ -f ${{ inputs.project_dir }}/${{ inputs.project_file }} ]; then
+          cd ${{ inputs.project_dir }}
+          
+          # Check if the project is a Maven or Gradle project
+          if [ ${{ inputs.project_file }} == 'pom.xml' ]; then
+            echo "Building with Maven"
+            mvn clean install
+          elif [ ${{ inputs.project_file }} == 'build.gradle' ]; then
+            echo "Building with Gradle"
+            ./gradlew build
+          else
+            echo "No recognized build file found"
+          fi
+    
         else
           echo "No build file found (pom.xml or build.gradle)"
         fi
