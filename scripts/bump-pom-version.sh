@@ -15,6 +15,3 @@ NEW_VERSION=$(echo "$CURRENT_VERSION" | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' | awk
         }
         print major, minor, patch
     }')
-echo "NEW_VERSION=$NEW_VERSION"
-echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
