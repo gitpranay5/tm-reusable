@@ -8,6 +8,14 @@ inputs:
     description: 'The version of the Python application'
     required: true
     default: '3.8'
+  project_dir:
+    description: 'The directory containing the Python project'
+    required: true
+    default: 'python'
+  requirements_file:
+    description: 'The requirements file (requirements.txt)'
+    required: true
+    default: 'requirements.txt'
 
 runs:
   using: 'composite'
@@ -26,9 +34,9 @@ runs:
         source venv/bin/activate
         python -m pip install --upgrade pip
 
-        if [ -f python/requirements.txt ]; then
-          cd python
-          pip install -r requirements.txt
+        if [ -f ${{ inputs.project_dir }}/${{ inputs.requirements_file }} ]; then
+          cd ${{ inputs.project_dir }}
+          pip install -r ${{ inputs.requirements_file }}
         else
           echo "requirements.txt not found"; exit 1
         fi
