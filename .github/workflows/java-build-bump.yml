@@ -56,7 +56,7 @@ jobs:
                 distribution: ${{ inputs.distribution }}
                 project_dir: ${{ inputs.project_dir }}
                 project_file: ${{ inputs.project_file }}
-
+                
             - name: Upload Java artifacts
               uses: actions/upload-artifact@v4
               with:
