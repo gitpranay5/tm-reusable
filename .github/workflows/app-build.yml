@@ -51,6 +51,9 @@ jobs:
               with:
                 version: ${{ inputs.version }}
                 distribution: ${{ inputs.distribution }}
+                project_dir: ${{ inputs.project_dir }} # need to declare first
+                project_file: ${{ inputs.project_file }} # need to declare first
+                
             - name: Upload Java artifacts
               if: ${{ inputs.language == 'java' }}
               uses: actions/upload-artifact@v4
