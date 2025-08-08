@@ -27,3 +27,4 @@ runs:
       with:
         repository: ${{ inputs.repository }}
         ref: ${{ inputs.ref }}
+        path: ${{ inputs.path }}
