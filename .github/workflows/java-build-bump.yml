@@ -69,9 +69,10 @@ jobs:
               run: |
                 chmod +x tm-reusable/scripts/bump-pom-version.sh
                 NEW_VERSION=$(./tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION )
+                echo "NEW_VERSION=$NEW_VERSION"
                 echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
-            - run: echo "$NEW_VERSION"
+            
            
            # - name: Commit and push changes
            #   if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
