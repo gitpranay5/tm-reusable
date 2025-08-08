@@ -71,6 +71,7 @@ jobs:
                 NEW_VERSION=$(./tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION )
                 echo "NEW_VERSION=$NEW_VERSION"
                 echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+                cd java || exit 0
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
             
            
