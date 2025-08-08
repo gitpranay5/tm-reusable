@@ -9,8 +9,8 @@ inputs:
     required: true
   ref:
     description: 'The branch or tag of the reusable workflow code'
-    required: false
-    default: 'main'
+    required: true
+    
   path:
     description: 'The path where the reusable workflow code will be checked out'
     required: false
@@ -27,4 +27,3 @@ runs:
       with:
         repository: ${{ inputs.repository }}
         ref: ${{ inputs.ref }}
-        path: reusable
