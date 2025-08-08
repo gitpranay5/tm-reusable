@@ -15,3 +15,4 @@ NEW_VERSION=$(echo "$CURRENT_VERSION" | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' | awk
         }
         print major, minor, patch
     }')
+echo "$NEW_VERSION"
