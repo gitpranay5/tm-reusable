@@ -36,7 +36,7 @@ jobs:
               id: get-version
               run: 
                 chmod +x tm-reusable/scripts/get-pom-version.sh
-                ./tm-reusable/scripts/get-pom-version.sh
+                GITHUB_OUTPUT=$GITHUB_OUTPUT ./tm-reusable/scripts/get-pom-version.sh
 
     build-java: # Build the Java application
         runs-on: ubuntu-latest
@@ -69,6 +69,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                 repository: gitpranay5/tm-reusable
+                ref: feature
                 path: tm-reusable  
 
             - name: Bump version in pom.xml
