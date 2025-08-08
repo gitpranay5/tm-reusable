@@ -34,7 +34,7 @@ jobs:
 
             - name: Get current version from pom.xml
               id: get-version
-              run: 
+              run: |
                 chmod +x tm-reusable/scripts/get-pom-version.sh
                 GITHUB_OUTPUT=$GITHUB_OUTPUT ./tm-reusable/scripts/get-pom-version.sh
 
