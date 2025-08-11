@@ -59,6 +59,14 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Cache Maven dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.m2/repository
+                key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+                restore-keys: |
+                  ${{ runner.os }}-maven-
+
             - name: Build Java application
               uses: gitpranay5/tm-reusable/actions/build-java@main
               with:
@@ -94,19 +102,6 @@ jobs:
                 echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
                 cd ${{ inputs.project_dir }} || exit 0
                 mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
-            
-           
-           # - name: Commit and push changes
-           #   if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
-           #   run: |
-           #     cd java || exit 0
-           #     git fetch origin ${{ github.head_ref }}
-           #     git checkout ${{ github.head_ref }}
-           #     git config --global user.email "ex@gmail.com"
-           #     git config --global user.name "Pranay Jujjuri"
-           #     git add pom.xml
-           #     git commit -m "Bump version to $NEW_VERSION" || echo "No changes to commit"
-           #     git push origin ${{ github.head_ref }}
 
             - name: Bump pom version directly to main branch on a push to main
               if: github.event_name == 'push' && github.ref == 'refs/heads/main'

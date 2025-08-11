@@ -1,0 +1,71 @@
+# Code Quality reusable workflow
+name: Code Quality
+
+on:
+    workflow_call:
+        inputs:
+            language:
+                description: 'The programming language of the project'
+                required: true
+                type: string
+            project_dir:
+                description: 'The project directory'
+                required: true
+                type: string
+            project_file:
+                description: 'The main project file (pom.xml or build.gradle)'
+                required: true
+                type: string
+            project_key:
+                description: 'The SonarQube project key'
+                required: true
+                type: string
+            version:
+                description: 'The JDK version to use'
+                required: true
+                type: string
+            distribution:
+                description: 'The JDK distribution to use'
+                required: true
+                type: string
+
+jobs:
+    code-quality:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+            - name: setup java
+              if: ${{ inputs.language == 'java' }}
+              uses: actions/setup-java@v4
+              with:
+                java-version: ${{ inputs.version }}
+                distribution: ${{ inputs.distribution }}
+            - name: Run code quality checks
+              if: ${{ inputs.language == 'java' }}
+              run: |
+                cd ${{ inputs.project_dir }} || exit 0
+                if [ -f "${{ inputs.project_file }}" ] && [ "${{ inputs.project_file }}" == "pom.xml" ]; then
+                  mvn clean verify
+                else
+                  echo "No valid project file found"
+                  exit 1
+                fi
+
+            - name: setup python
+              if: ${{ inputs.language == 'python' }}
+              uses: actions/setup-python@v4
+              with:
+                python-version: ${{ inputs.version }}
+            
+            - name: SonarQube Scan
+              uses: SonarSource/sonarcloud-github-action@v5
+              with:
+                args: >
+                  -Dsonar.projectKey=${{ inputs.project_key }}
+                  -Dsonar.sources=${{ inputs.project_dir }}
+                  -Dsonar.host.url=https://sonarcloud.io
+                  -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+                  -Dsonar.qualitygate.wait=true
