@@ -20,10 +20,10 @@ on:
                 description: 'The main project file (pom.xml or build.gradle)'
                 required: true
                 type: string
-           # project_key:
-           #     description: 'The SonarQube project key'
-           #     required: true
-           #     type: string
+            project_key:
+                description: 'The SonarQube project key'
+                required: true
+                type: string
             version:
                 description: 'The JDK version to use'
                 required: true
@@ -32,10 +32,10 @@ on:
                 description: 'The JDK distribution to use'
                 required: true
                 type: string
-           # organization:
-           #     description: 'The SonarQube organization'
-           #     required: true
-           #     type: string
+            organization:
+                description: 'The SonarQube organization'
+                required: true
+                type: string
 
 jobs:
     code-quality:
@@ -73,9 +73,9 @@ jobs:
               with:
                 args: >
                   -Dsonar.branch.name=${{ github.ref }}
-                  -Dsonar.projectKey="gitpranay5_tm-application"
+                  -Dsonar.projectKey=${{ inputs.project_key }}
                   -Dsonar.sources=${{ inputs.project_dir }}
-                  -Dsonar.organization="gitpranay5"
+                  -Dsonar.organization=${{ inputs.organization }}
                   -Dsonar.host.url=https://sonarcloud.io
                   -Dsonar.login=${{ secrets.SONAR_TOKEN }}
                   -Dsonar.qualitygate.wait=true
