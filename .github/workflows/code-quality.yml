@@ -3,6 +3,10 @@ name: Code Quality
 
 on:
     workflow_call:
+        secrets:
+            SONAR_TOKEN:
+                description: 'SonarQube token'
+                required: true
         inputs:
             language:
                 description: 'The programming language of the project'
