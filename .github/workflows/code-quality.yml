@@ -72,6 +72,7 @@ jobs:
               uses: SonarSource/sonarcloud-github-action@v5
               with:
                 args: >
+                  -Dsonar.branch.name=${{ github.ref }}
                   -Dsonar.projectKey=${{ inputs.project_key }}
                   -Dsonar.sources=${{ inputs.project_dir }}
                   -Dsonar.organization=${{ inputs.organization }}
