@@ -1,0 +1,65 @@
+# This is a composite action to get service config values
+# this will pass those input values which are in config file to the workflow
+
+name: Get Service Config Values
+description: This is a composite action to get service config values/inputs
+
+inputs:
+  service_config_file:
+    description: "Path to the service config file"
+    required: true
+    default: "service-config.yml"
+  service_name:
+    description: "The name of the service"
+    required: true
+
+outputs:
+  language:
+    description: "The programming language of the service"
+    value: "${{ steps.config-values.outputs.language }}"
+  version:
+    description: "The version of the service"
+    value: "${{ steps.config-values.outputs.version }}"
+  project_dir:
+    description: "The project directory of the service"
+    value: "${{ steps.config-values.outputs.project_dir }}"
+  build_file:
+    description: "The build file of the service"
+    value: "${{ steps.config-values.outputs.build_file }}"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup and Install yq
+      shell: bash
+      run: |
+        sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+        sudo chmod +x /usr/bin/yq
+
+    - name: Extracting service config values or inputs
+      shell: bash
+      id: config-values
+      run: |
+        CONFIG_FILE="${{ inputs.service_config_file }}"
+        SERVICE_NAME="${{ inputs.service_name }}"
+        echo "CONFIG_FILE=$CONFIG_FILE"
+        echo "SERVICE_NAME=$SERVICE_NAME"
+
+        language=$(yq e ".services.${SERVICE_NAME}.language" $CONFIG_FILE)
+        version=$(yq e ".services.${SERVICE_NAME}.version" $CONFIG_FILE)
+        project_dir=$(yq e ".services.${SERVICE_NAME}.project_dir" $CONFIG_FILE)
+        build_file=$(yq e ".services.${SERVICE_NAME}.project_file" $CONFIG_FILE)
+        echo "language=$language"
+        echo "version=$version"
+        echo "project_dir=$project_dir"
+        echo "build_file=$build_file"
+
+        echo "language=$language" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
+        echo "project_dir=$project_dir" >> $GITHUB_OUTPUT
+        echo "build_file=$build_file" >> $GITHUB_OUTPUT

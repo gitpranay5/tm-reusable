@@ -1,0 +1,42 @@
+# This is a java build reusable workflow which uses application service config file to get
+# the input values to build java applications
+
+name: Java Build with Service Config file
+on:
+  workflow_call:
+    inputs:
+      service_config_file:
+        description: "Path to the service config file"
+        required: true
+        type: string
+      service_name:
+        description: "The name of the service"
+        required: true
+        type: string
+
+jobs:
+    get-values-configfile:
+        runs-on: ubuntu-latest
+        outputs:
+          language: ${{ steps.get-config-values.outputs.language }}
+          version: ${{ steps.get-config-values.outputs.version }}
+          project_dir: ${{ steps.get-config-values.outputs.project_dir }}
+          build_file: ${{ steps.get-config-values.outputs.build_file }}
+        steps:
+            - name: Get service config values
+              uses: gitpranay5/tm-reusable/actions/get-service-config-values@feat
+              id: get-config-values
+              with:
+                service_config_file: ${{ inputs.service_config_file }}
+                service_name: ${{ inputs.service_name }}
+    
+    build-java:
+        runs-on: ubuntu-latest
+        needs: [get-values-configfile]
+        steps:
+            - name: Build Java application
+              uses: gitpranay5/tm-reusable/actions/build-java-general@feat
+              with:
+                version: ${{ needs.get-values-configfile.outputs.version }}
+                project_dir: ${{ needs.get-values-configfile.outputs.project_dir }}
+                project_file: ${{ needs.get-values-configfile.outputs.build_file }}
