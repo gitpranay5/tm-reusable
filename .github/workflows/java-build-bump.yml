@@ -23,6 +23,13 @@ on:
                 required: false
                 default: 'ex123@gmail.com'
                 type: string
+        outputs:
+          project_dir:
+            description: "The detected project directory"
+            value: ${{ jobs.get-dir-files.outputs.project_dir }}
+          project_file:
+            description: "The detected project file"
+            value: ${{ jobs.get-dir-files.outputs.project_file }}
 
 jobs:
     get-dir-files:
