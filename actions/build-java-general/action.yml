@@ -26,12 +26,18 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: ${{ inputs.version }}
         distribution: ${{ inputs.distribution }}
         cache: ${{ inputs.cache }}
+        
     - name: Build Java application
       shell: bash
       run: |
