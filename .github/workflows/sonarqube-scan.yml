@@ -4,7 +4,7 @@ name: SonarQube Code Quality
 on:
   workflow_call:
     secrets:
-        sonar_token:
+        SONAR_TOKEN:
           description: "SonarQube authentication token"
           required: true
     inputs:
