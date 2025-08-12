@@ -66,13 +66,13 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Cache Maven dependencies
-              uses: actions/cache@v4
-              with:
-                path: ~/.m2/repository
-                key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-                restore-keys: |
-                  ${{ runner.os }}-maven-
+          #  - name: Cache Maven dependencies
+          #    uses: actions/cache@v4
+          #    with:
+          #      path: ~/.m2/repository
+          #     key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          #     restore-keys: |
+          #       ${{ runner.os }}-maven-
 
             - name: Build Java application
               uses: gitpranay5/tm-reusable/actions/build-java-general@feat
