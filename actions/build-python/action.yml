@@ -1,0 +1,64 @@
+# This is a composite action for building Python applications
+
+description: 'Composite action for building Python applications'
+name: Build Python Application
+
+inputs:
+  python-version:
+    description: 'The version of the Python application'
+    required: true
+    default: '3.8'
+  project_dir:
+    description: 'The directory containing the Python project'
+    required: true
+    default: 'python'
+  requirements_file:
+    description: 'The requirements file (requirements.txt)'
+    required: true
+    default: 'requirements.txt'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Detect Python project directory
+      id: detect
+      shell: bash
+      run: |
+        FILE=$(find . -type f -name "requirements.txt" -o -name "pyproject.toml" -o -name "Pipfile")
+        if [ -z "$FILE" ]; then
+          echo "No Python dependency file found"
+          exit 1
+        fi
+        DIR=$(dirname "$FILE")
+        F_NAME=$(basename "$FILE")
+        echo "$DIR"
+        echo "$F_NAME"
+        echo "project_dir=$DIR" >> $GITHUB_OUTPUT
+        echo "project_file=$F_NAME" >> $GITHUB_OUTPUT
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        python -m pip install --upgrade pip
+
+        cd ${{ steps.detect.outputs.project_dir }}
+        if [ "${{ steps.detect.outputs.project_file }}" == 'requirements.txt' ]; then
+          pip install -r requirements.txt
+        elif [ "${{ steps.detect.outputs.project_file }}" == 'pyproject.toml' ]; then
+          pip install poetry && poetry install
+        elif [ "${{ steps.detect.outputs.project_file }}" == 'Pipfile' ]; then
+          pip install pipenv && pipenv install
+        else
+          echo "No recognized Python dependency file found"
+          exit 1
+        fi

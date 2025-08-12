@@ -1,0 +1,29 @@
+# This action checks out the caller's code and the reusable workflow code
+
+name: Checkout Caller & Reusable
+description: This action checks out the caller's code and the reusable workflow code
+
+inputs:
+  repository:
+    description: 'The repository of the reusable workflow code'
+    required: true
+  ref:
+    description: 'The branch or tag of the reusable workflow code'
+    required: true
+  path:
+    description: 'The path where the reusable workflow code will be checked out'
+    required: false
+    default: 'tm-reusable'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout caller code
+      uses: actions/checkout@v4
+
+    - name: Checkout reusable workflow code
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
+        path: ${{ inputs.path }}

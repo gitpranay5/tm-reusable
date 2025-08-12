@@ -1,0 +1,36 @@
+# This composite action is for retrieving Java directory build files.
+
+name: Get Java Directory Build Files
+description: 'Composite action for get the Java directory and its build files'
+
+outputs:
+  project_dir:
+    description: 'The directory containing the Java project source'
+    value: ${{ steps.detect.outputs.project_dir }}
+  project_file:
+    description: 'The main project file (pom.xml or build.gradle or others)'
+    value: ${{ steps.detect.outputs.project_file }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Detect java project directory and file
+      id: detect
+      shell: bash
+      run: |
+        # Search for pom.xml or build.gradle
+        FILE=$(find . -type f -name "pom.xml" -o -name "build.gradle" -o -name "build.gradle.kts" -o -name "build.xml")
+        if [ -z "$FILE" ]; then
+          echo "No pom.xml or build.gradle found"
+          exit 1
+        fi
+        DIR=$(dirname "$FILE")
+        F_NAME=$(basename "$FILE")
+        echo "$DIR"
+        echo "$F_NAME"
+        echo "project_dir=$DIR" >> $GITHUB_OUTPUT
+        echo "project_file=$F_NAME" >> $GITHUB_OUTPUT

@@ -1,0 +1,46 @@
+# This is a java project general build action
+# when we have the project dir name and the project file name like pom.xml, build.gradle, etc.
+
+name: Build Java Project general
+description: 'Composite action for building Java project with dir name and file names'
+
+inputs:
+  version:
+    description: 'The version of the Java application'
+    required: true
+  distribution:
+    description: 'The distribution of the Java application'
+    required: false
+    default: 'temurin'
+  project_dir:
+    description: 'The directory containing the Java project source'
+    required: true
+  project_file:
+    description: 'The main project file (pom.xml or build.gradle or others)'
+    required: true
+  cache:
+    description: 'Enable caching for Maven dependencies'
+    required: false
+    default: maven
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ inputs.version }}
+        distribution: ${{ inputs.distribution }}
+        cache: ${{ inputs.cache }}
+    - name: Build Java application
+      shell: bash
+      run: |
+        cd ${{ inputs.project_dir }}
+        if [ "${{ inputs.project_file }}" == "pom.xml" ]; then
+          mvn clean package
+        elif [ "${{ inputs.project_file }}" == "build.gradle" ] || [ "${{ inputs.project_file }}" == "build.gradle.kts" ]; then
+          ./gradlew build
+        else
+          echo "No valid project file found"
+          exit 1
+        fi

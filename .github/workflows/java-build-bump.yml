@@ -1,0 +1,130 @@
+# This is a Java build and version bump workflow
+
+name: Java Build and Version Bump
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                description: 'The version of the Java application'
+                required: true
+                type: string
+            distribution:
+                description: 'The distribution of the Java application (if applicable)'
+                required: false
+                type: string
+            user_name:
+                description: 'The name of the user making the changes'
+                required: false
+                default: 'ex'
+                type: string
+            user_email:
+                description: 'The email of the user making the changes'
+                required: false
+                default: 'ex123@gmail.com'
+                type: string
+
+jobs:
+    get-dir-files:
+      runs-on: ubuntu-latest
+      outputs:
+        project_dir: ${{ steps.java-detect.outputs.project_dir }}
+        project_file: ${{ steps.java-detect.outputs.project_file }}
+      steps:
+        - name: Get java directory and files
+          uses: gitpranay5/tm-reusable/actions/get-java-dir-files@feat
+          id: java-detect
+
+    get-version: # Get the current version of pom.xml 
+        runs-on: ubuntu-latest
+        needs: get-dir-files
+        outputs:
+            VERSION: ${{ steps.get-version.outputs.VERSION }}
+        steps:
+            - name: Checkout caller and reusable code
+              uses: gitpranay5/tm-reusable/actions/checkout-caller-reusable@feat
+              with:
+                repository: gitpranay5/tm-reusable
+                ref: feat
+            - name: Setup Maven
+              uses: gitpranay5/tm-reusable/actions/setup-java-for-maven@feat
+              with:
+                version: ${{ inputs.version }}
+
+            - name: Get current version from pom.xml
+              id: get-version
+              run: |
+                chmod +x tm-reusable/scripts/get-pom-version.sh
+                VERSION=$(./tm-reusable/scripts/get-pom-version.sh "${{ needs.get-dir-files.outputs.project_dir }}" "${{ needs.get-dir-files.outputs.project_file }}" )
+                echo "VERSION=$VERSION"
+                echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+    build-java: # Build the Java application
+        runs-on: ubuntu-latest
+        needs: [get-dir-files, get-version]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Cache Maven dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.m2/repository
+                key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+                restore-keys: |
+                  ${{ runner.os }}-maven-
+
+            - name: Build Java application
+              uses: gitpranay5/tm-reusable/actions/build-java-general@feat
+              with:
+                version: ${{ inputs.version }}
+                project_dir: ${{ needs.get-dir-files.outputs.project_dir }}
+                project_file: ${{ needs.get-dir-files.outputs.project_file }}
+
+            - name: Upload Java artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ needs.get-dir-files.outputs.project_dir }}-artifact-${{ needs.get-version.outputs.VERSION }}
+                path: ${{ needs.get-dir-files.outputs.project_dir }}/target/*.jar
+
+    bump-pom-version: # Bump the version in pom.xml in branches
+        runs-on: ubuntu-latest
+        needs: [get-dir-files, get-version]
+        env:
+          CURRENT_VERSION: ${{ needs.get-version.outputs.VERSION }}
+        steps:
+            - name: Checkout code
+              uses: gitpranay5/tm-reusable/actions/checkout-caller-reusable@feat
+              with:
+                repository: gitpranay5/tm-reusable
+                ref: feat
+            - name: Setup Maven
+              uses: gitpranay5/tm-reusable/actions/setup-java-for-maven@feat
+              with:
+                version: ${{ inputs.version }}
+
+            - name: Bump version in pom.xml
+              id: bump-version
+              run: |
+                chmod +x tm-reusable/scripts/bump-pom-version.sh
+                NEW_VERSION=$(./tm-reusable/scripts/bump-pom-version.sh $CURRENT_VERSION )
+                echo "NEW_VERSION=$NEW_VERSION"
+                echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+            - name: Bump pom version directly to main branch on a push to main
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              run: |
+                cd ${{ needs.get-dir-files.outputs.project_dir }} || exit 0
+                mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
+                git config --global user.email "${{ inputs.user_email }}"
+                git config --global user.name "${{ inputs.user_name }}"
+                git add pom.xml
+                git commit -m "Bumpped the version to $NEW_VERSION" || echo "No changes to commit"
+                git push origin main
+            
+            - name: Adding git tag and pushing
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              run: |
+                cd ${{ needs.get-dir-files.outputs.project_dir }} || exit 0
+                git tag "v$NEW_VERSION"
+                git push origin "v$NEW_VERSION"

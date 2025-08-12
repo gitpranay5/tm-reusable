@@ -1,0 +1,54 @@
+# This is a composite action for building Java applications
+
+name: Build Java Application
+description: 'Composite action for building Java applications'
+
+inputs:
+  version:
+    description: 'The version of the Java application'
+    required: true
+  distribution:
+    description: 'The distribution of the Java application'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ inputs.version }}
+        distribution: ${{ inputs.distribution }}
+        cache: 'maven'
+    
+    - name: Detect project directory and file
+      id: detect
+      shell: bash
+      run: |
+        # Search for pom.xml or build.gradle
+        FILE=$(find . -type f -name "pom.xml" -o -name "build.gradle" -o -name "build.gradle.kts" -o -name "build.xml")
+        if [ -z "$FILE" ]; then
+          echo "No pom.xml or build.gradle found"
+          exit 1
+        fi
+        DIR=$(dirname "$FILE")
+        F_NAME=$(basename "$FILE")
+        echo "$DIR"
+        echo "$F_NAME"
+        echo "project_dir=$DIR" >> $GITHUB_OUTPUT
+        echo "project_file=$F_NAME" >> $GITHUB_OUTPUT
+
+    - name: install dependencies and build Java application
+      shell: bash
+      run: |
+          cd ${{ steps.detect.outputs.project_dir }}
+          if [ "${{ steps.detect.outputs.project_file }}" == 'pom.xml' ]; then
+            echo "Building with Maven"
+            mvn clean install
+          elif [ "${{ steps.detect.outputs.project_file }}" == 'build.gradle' ] || [ "${{ steps.detect.outputs.project_file }}" == 'build.gradle.kts' ]; then
+            echo "Building with Gradle"
+            ./gradlew build
+          else
+            echo "No recognized build file found"
+          fi
+    

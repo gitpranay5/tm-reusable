@@ -1,0 +1,99 @@
+# This is a GitHub Actions workflow file for building an application
+name: Build and upload artifacts
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        description: 'The programming language of the application'
+        required: true
+        type: string
+      version:
+        description: 'The version of the application'
+        required: true
+        type: string
+      distribution:
+        description: 'The distribution of the application (if applicable)'
+        required: false
+        type: string
+        default: 'temurin'
+
+jobs:
+    build-application:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - run: echo "Building application for ${{ inputs.language }} version ${{ inputs.version }}"
+              
+            - name: Set up environment for ${{ inputs.language }}
+              if: ${{ inputs.language == 'python' }}
+              uses: gitpranay5/tm-reusable/actions/build-python@main
+              with:
+                version: ${{ inputs.version }}
+            - name: Upload Python artifacts
+              if: ${{ inputs.language == 'python' }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: python-artifacts
+                path: |
+                    venv/lib/python${{ inputs.version }}/site-packages
+                    venv/bin
+                    venv/lib/python${{ inputs.version }}/dist-packages
+                    echo "Python artifacts uploaded successfully"
+           # - name: Log build completion
+           #   run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
+
+            - name: Set up environment for ${{ inputs.language }}
+              if: ${{ inputs.language == 'java' }}
+              uses: gitpranay5/tm-reusable/actions/build-java@main
+              with:
+                version: ${{ inputs.version }}
+                distribution: ${{ inputs.distribution }}
+                project_dir: ${{ inputs.project_dir }} # need to declare first
+                project_file: ${{ inputs.project_file }} # need to declare first
+                
+            - name: Upload Java artifacts
+              if: ${{ inputs.language == 'java' }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: java-artifacts
+                path: java/target/*.jar
+                
+           # - name: Log build completion
+           #   run: echo "Build completed and artifacts uploaded for ${{ inputs.language }} version ${{ inputs.version }}"
+
+
+    download-artifacts:
+        needs: build-application
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v3
+
+          - name: Download Python artifacts
+            if: ${{ inputs.language == 'python' }}
+            uses: actions/download-artifact@v4
+            with:
+              name: python-artifacts
+              path: |
+                  venv/lib/python${{ inputs.version }}/site-packages
+                  venv/bin
+                  venv/lib/python${{ inputs.version }}/dist-packages
+                  venv/lib/python${{ inputs.version }}/site-packages
+                  venv/bin
+                  venv/lib/python${{ inputs.version }}/dist-packages
+                  echo "Python artifacts downloaded successfully"
+         # - name: Log build completion
+         #   run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"
+
+          - name: Download Java artifacts
+            if: ${{ inputs.language == 'java' }}
+            uses: actions/download-artifact@v4
+            with:
+              name: java-artifacts
+              path: java/target/*.jar
+              
+         # - name: Log build completion
+         #   run: echo "Artifacts downloaded for ${{ inputs.language }} version ${{ inputs.version }}"

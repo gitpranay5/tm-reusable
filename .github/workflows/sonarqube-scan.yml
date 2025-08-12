@@ -1,0 +1,86 @@
+# Code Quality reusable workflow
+name: SonarQube Code Quality
+
+on:
+  workflow_call:
+    secrets:
+        sonar_token:
+          description: "SonarQube authentication token"
+          required: true
+    inputs:
+      language:
+        description: "Application language (java, python, javascript, etc.)"
+        required: true
+        type: string
+      source_dir:
+        description: "Relative path to source code directory"
+        required: true
+        type: string
+      project_key:
+        description: "Unique SonarQube project key"
+        required: true
+        type: string
+      organization:
+        description: "SonarQube organization"
+        required: true
+        type: string
+      java_version:
+        description: "Java version (if Java project)"
+        required: false
+        type: string
+        default: "17"
+      node_version:
+        description: "Node.js version (if JavaScript project)"
+        required: false
+        type: string
+        default: "18"
+      python_version:
+        description: "Python version (if Python project)"
+        required: false
+        type: string
+        default: "3.12"
+
+jobs:
+  sonarqube-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java (if Java)
+        if: ${{ inputs.language == 'java' }}
+        uses: gitpranay5/tm-reusable/actions/setup-java-for-maven@feat
+        with:
+          version: ${{ inputs.java_version }}
+
+      - name: Setup Python (if Python)
+        if: ${{ inputs.language == 'python' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Setup Node.js (if JavaScript)
+        if: ${{ inputs.language == 'javascript' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+
+      - name: Cache SonarQube Scanner
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar-${{ hashFiles('**/*.gradle*', '**/pom.xml', '**/package-lock.json', '**/yarn.lock', '**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-sonar-
+
+      - name: Run SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: ${{ inputs.source_dir }}
+          args: >
+            -Dsonar.projectKey=${{ inputs.project_key }}
+            -Dsonar.organization=${{ inputs.organization }}
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
