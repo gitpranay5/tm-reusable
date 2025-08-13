@@ -63,26 +63,26 @@ jobs:
       - name: Setup language
         uses: gitpranay5/tm-reusable/actions/setup-language@feat
         with:
-          language: ${{ steps.config.outputs.language }}
-          version: ${{ steps.config.outputs.version }}
+          language: ${{ needs.get-service-values.outputs.language }}
+          version: ${{ needs.get-service-values.outputs.version }}
 
       - name: Build java Project
-        if: ${{ steps.config.outputs.language == 'java' }}
+        if: ${{ needs.get-service-values.outputs.language == 'java' }}
         uses: gitpranay5/tm-reusable/actions/general-java-build@feat
         with:
-          project_dir: ${{ steps.config.outputs.project_dir }}
-          build_file: ${{ steps.config.outputs.build_file }}
+          project_dir: ${{ needs.get-service-values.outputs.project_dir }}
+          build_file: ${{ needs.get-service-values.outputs.build_file }}
 
       - name: Build Python Project
-        if: ${{ steps.config.outputs.language == 'python' }}
+        if: ${{ needs.get-service-values.outputs.language == 'python' }}
         uses: gitpranay5/tm-reusable/actions/general-python-build@feat
         with:
-          project_dir: ${{ steps.config.outputs.project_dir }}
-          build_file: ${{ steps.config.outputs.build_file }}
+          project_dir: ${{ needs.get-service-values.outputs.project_dir }}
+          build_file: ${{ needs.get-service-values.outputs.build_file }}
 
       - name: Build Node.js Project
-        if: ${{ steps.config.outputs.language == 'node.js' }}
+        if: ${{ needs.get-service-values.outputs.language == 'node.js' }}
         uses: gitpranay5/tm-reusable/actions/general-node-build@feat
         with:
-          project_dir: ${{ steps.config.outputs.project_dir }}
-          build_file: ${{ steps.config.outputs.build_file }}
+          project_dir: ${{ needs.get-service-values.outputs.project_dir }}
+          build_file: ${{ needs.get-service-values.outputs.build_file }}
