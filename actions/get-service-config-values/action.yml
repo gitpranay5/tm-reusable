@@ -26,6 +26,12 @@ outputs:
   build_file:
     description: "The build file of the service"
     value: "${{ steps.config-values.outputs.build_file }}"
+  sonar_project_key:
+    description: "The SonarQube project key of the service"
+    value: "${{ steps.config-values.outputs.sonar_project_key }}"
+  sonar_organization:
+    description: "The SonarQube organization of the service"
+    value: "${{ steps.config-values.outputs.sonar_organization }}"
 
 runs:
   using: "composite"
@@ -54,12 +60,18 @@ runs:
         version=$(yq e ".services.${SERVICE_NAME}.version" $CONFIG_FILE)
         project_dir=$(yq e ".services.${SERVICE_NAME}.project_dir" $CONFIG_FILE)
         build_file=$(yq e ".services.${SERVICE_NAME}.project_file" $CONFIG_FILE)
+        sonar_project_key=$(yq e ".services.${SERVICE_NAME}.sonar_project_key" $CONFIG_FILE)
+        sonar_organization=$(yq e ".services.${SERVICE_NAME}.sonar_organization" $CONFIG_FILE)
         echo "language=$language"
         echo "version=$version"
         echo "project_dir=$project_dir"
         echo "build_file=$build_file"
+        echo "sonar_project_key=$sonar_project_key"
+        echo "sonar_organization=$sonar_organization"
 
         echo "language=$language" >> $GITHUB_OUTPUT
         echo "version=$version" >> $GITHUB_OUTPUT
         echo "project_dir=$project_dir" >> $GITHUB_OUTPUT
         echo "build_file=$build_file" >> $GITHUB_OUTPUT
+        echo "sonar_project_key=$sonar_project_key" >> $GITHUB_OUTPUT
+        echo "sonar_organization=$sonar_organization" >> $GITHUB_OUTPUT

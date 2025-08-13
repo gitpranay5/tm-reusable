@@ -1,0 +1,43 @@
+# This composite action is to setup programming language to build the application
+
+name: Setup Language
+description: This composite action sets up the programming language environment for building the application.
+
+inputs:
+  language:
+    description: "The programming language to setup"
+    required: true
+  version:
+    description: "The version of the programming language"
+    required: true
+  distribution:
+    description: "The distribution of the programming language"
+    required: false
+    default: 'temurin'
+  cache:
+    description: "Enable caching for the programming language"
+    required: false
+    default: 'maven'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Java JDK
+      if: ${{ inputs.language == 'java' }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.version }}
+        distribution: ${{ inputs.distribution }}
+        cache: ${{ inputs.cache }}
+
+    - name: Setup Python
+      if: ${{ inputs.language == 'python' }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.version }}
+
+    - name: Setup Node.js
+      if: ${{ inputs.language == 'node.js' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.version }}

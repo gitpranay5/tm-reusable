@@ -1,0 +1,36 @@
+# This composite action is to build a Node.js projects
+
+name: Build Node.js Project
+description: 'Composite action for building Node.js projects'
+
+inputs:
+  project_dir:
+    description: 'The directory containing the Node.js project source'
+    required: true
+  build_file:
+    description: 'The main project file (package.json or others)'
+    required: true
+  cache:
+    description: 'Enable caching for Node.js dependencies'
+    required: false
+    default: npm
+
+runs:
+  using: 'composite'
+  steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Build project
+      shell: bash
+      run: |
+        cd ${{ inputs.project_dir }}
+        if [ "${{ inputs.build_file }}" == "package.json" ]; then
+          npm install
+          npm run build
+        else
+          echo "No valid project file found"
+          exit 1
+        fi

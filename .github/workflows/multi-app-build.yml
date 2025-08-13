@@ -1,0 +1,88 @@
+# This is a multi-language build workflow that reads service configurations file
+name: Multi Language Build from Config
+
+on:
+  workflow_call:
+    inputs:
+      service_config_file:
+        required: true
+        type: string
+
+jobs:
+  # 1. Read service names from config file
+  get-services:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.extract.outputs.services }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Extract service names from service config file
+        id: extract
+        run: |
+          services=$(yq e '.services | keys' ${{ inputs.service_config_file }} | yq e -o=json -)
+          echo "services=$services"
+          echo "services=$services" >> $GITHUB_OUTPUT
+
+  # 2. Matrix build based on extracted service list
+  get-service-values:
+    needs: get-services
+    runs-on: ubuntu-latest
+    outputs:
+          language: ${{ steps.config.outputs.language }}
+          version: ${{ steps.config.outputs.version }}
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.get-services.outputs.services) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Config Values
+        id: config
+        uses: gitpranay5/tm-reusable/actions/get-service-config-values@feat
+        with:
+          service_config_file: ${{ inputs.service_config_file }}
+          service_name: ${{ matrix.service }}
+  build:
+    needs: [get-service-values]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup language
+        uses: gitpranay5/tm-reusable/actions/setup-language@feat
+        with:
+          language: ${{ steps.config.outputs.language }}
+          version: ${{ steps.config.outputs.version }}
+
+      - name: Build java Project
+        if: ${{ steps.config.outputs.language == 'java' }}
+        uses: gitpranay5/tm-reusable/actions/general-java-build@feat
+        with:
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}
+
+      - name: Build Python Project
+        if: ${{ steps.config.outputs.language == 'python' }}
+        uses: gitpranay5/tm-reusable/actions/general-python-build@feat
+        with:
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}
+
+      - name: Build Node.js Project
+        if: ${{ steps.config.outputs.language == 'node.js' }}
+        uses: gitpranay5/tm-reusable/actions/general-node-build@feat
+        with:
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}

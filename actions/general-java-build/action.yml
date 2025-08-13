@@ -5,9 +5,6 @@ name: Build Java Project general
 description: 'Composite action for building Java project with dir name and file names'
 
 inputs:
-  version:
-    description: 'The version of the Java application'
-    required: true
   distribution:
     description: 'The distribution of the Java application'
     required: false
@@ -15,7 +12,7 @@ inputs:
   project_dir:
     description: 'The directory containing the Java project source'
     required: true
-  project_file:
+  build_file:
     description: 'The main project file (pom.xml or build.gradle or others)'
     required: true
   cache:
@@ -30,21 +27,14 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: ${{ inputs.version }}
-        distribution: ${{ inputs.distribution }}
-        cache: ${{ inputs.cache }}
         
     - name: Build Java application
       shell: bash
       run: |
         cd ${{ inputs.project_dir }}
-        if [ "${{ inputs.project_file }}" == "pom.xml" ]; then
+        if [ "${{ inputs.build_file }}" == "pom.xml" ]; then
           mvn clean package
-        elif [ "${{ inputs.project_file }}" == "build.gradle" ] || [ "${{ inputs.project_file }}" == "build.gradle.kts" ]; then
+        elif [ "${{ inputs.build_file }}" == "build.gradle" ] || [ "${{ inputs.build_file }}" == "build.gradle.kts" ]; then
           ./gradlew build
         else
           echo "No valid project file found"

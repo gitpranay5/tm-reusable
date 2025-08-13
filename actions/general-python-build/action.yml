@@ -1,0 +1,44 @@
+# This is a python project general build action
+# when we have the project dir name and the project file name like .
+
+name: Build Python Project general
+description: 'Composite action for building Python project with dir name and file names'
+
+inputs:
+  project_dir:
+    description: 'The directory containing the Python project source'
+    required: true
+  build_file:
+    description: 'The main project file (pom.xml or build.gradle or others)'
+    required: true
+  cache:
+    description: 'Enable caching for Python dependencies'
+    required: false
+    default: pip
+
+runs:
+  using: 'composite'
+  steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Build Python application
+      shell: bash
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        python -m pip install --upgrade pip
+
+        cd ${{ inputs.project_dir }}
+        if [ "${{ inputs.build_file }}" == "requirements.txt" ]; then
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+        elif [ "${{ inputs.build_file }}" == "pyproject.toml" ]; then
+          pip install poetry && poetry install
+          python -m build
+        else
+          echo "No valid project file found"
+          exit 1
+        fi
