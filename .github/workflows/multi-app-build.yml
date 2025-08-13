@@ -32,8 +32,8 @@ jobs:
           echo "services=$services"
           echo "services=$services" >> $GITHUB_OUTPUT
 
-  # 2. Matrix build based on extracted service list
-  get-service-values:
+  # 2. Matrix build based on extracted service list and build for the services
+  get-service-values-build:
     runs-on: ubuntu-latest
     needs: get-services
     outputs:
@@ -61,33 +61,23 @@ jobs:
         with:
           language: ${{ steps.config.outputs.language }}
           version: ${{ steps.config.outputs.version }}
-  build:
-    needs: get-service-values
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup language
-        uses: gitpranay5/tm-reusable/actions/setup-language@feat
-        with:
-          language: ${{ needs.get-service-values.outputs.language }}
-          version: ${{ needs.get-service-values.outputs.version }}
-
       - name: Build java Project
-        if: ${{ needs.get-service-values.outputs.language == 'java' }}
+        if: ${{ steps.config.outputs.language == 'java' }}
         uses: gitpranay5/tm-reusable/actions/general-java-build@feat
         with:
-          project_dir: ${{ needs.get-service-values.outputs.project_dir }}
-          build_file: ${{ needs.get-service-values.outputs.build_file }}
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}
 
       - name: Build Python Project
-        if: ${{ needs.get-service-values.outputs.language == 'python' }}
+        if: ${{ steps.config.outputs.language == 'python' }}
         uses: gitpranay5/tm-reusable/actions/general-python-build@feat
         with:
-          project_dir: ${{ needs.get-service-values.outputs.project_dir }}
-          build_file: ${{ needs.get-service-values.outputs.build_file }}
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}
 
       - name: Build Node.js Project
-        if: ${{ needs.get-service-values.outputs.language == 'node.js' }}
+        if: ${{ steps.config.outputs.language == 'node.js' }}
         uses: gitpranay5/tm-reusable/actions/general-node-build@feat
         with:
-          project_dir: ${{ needs.get-service-values.outputs.project_dir }}
-          build_file: ${{ needs.get-service-values.outputs.build_file }}
+          project_dir: ${{ steps.config.outputs.project_dir }}
+          build_file: ${{ steps.config.outputs.build_file }}
