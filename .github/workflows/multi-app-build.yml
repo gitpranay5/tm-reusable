@@ -28,7 +28,7 @@ jobs:
       - name: Extract service names from service config file
         id: extract
         run: |
-          services=$(yq e '.services | keys' ${{ inputs.service_config_file }} | yq e -o=json -)
+          services=$(yq e '.services | keys' ${{ inputs.service_config_file }} | yq e -o=json - | tr -d '\n')
           echo "services=$services"
           echo "services=$services" >> $GITHUB_OUTPUT
 
