@@ -14,7 +14,7 @@ inputs:
   cache:
     description: 'Enable caching for Python dependencies'
     required: false
-    default: pip
+    default: 'pip'
 
 runs:
   using: 'composite'

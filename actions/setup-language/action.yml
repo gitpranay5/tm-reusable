@@ -10,14 +10,6 @@ inputs:
   version:
     description: "The version of the programming language"
     required: true
-  distribution:
-    description: "The distribution of the programming language"
-    required: false
-    default: 'temurin'
-  cache:
-    description: "Enable caching for the programming language"
-    required: false
-    default: 'maven'
 
 runs:
   using: "composite"
@@ -27,8 +19,6 @@ runs:
       uses: actions/setup-java@v4
       with:
         java-version: ${{ inputs.version }}
-        distribution: ${{ inputs.distribution }}
-        cache: ${{ inputs.cache }}
 
     - name: Setup Python
       if: ${{ inputs.language == 'python' }}

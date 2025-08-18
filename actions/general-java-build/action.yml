@@ -18,7 +18,7 @@ inputs:
   cache:
     description: 'Enable caching for Maven dependencies'
     required: false
-    default: maven
+    default: 'maven'
 
 runs:
   using: 'composite'

@@ -13,7 +13,7 @@ inputs:
   cache:
     description: 'Enable caching for Node.js dependencies'
     required: false
-    default: npm
+    default: 'npm'
 
 runs:
   using: 'composite'
