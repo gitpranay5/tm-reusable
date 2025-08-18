@@ -56,15 +56,12 @@ jobs:
         with:
           service_config_file: ${{ inputs.service_config_file }}
           service_name: ${{ matrix.service }}
-      - name: Setup language
-        uses: gitpranay5/tm-reusable/actions/setup-language@feat
-        with:
-          language: ${{ steps.config.outputs.language }}
-          version: ${{ steps.config.outputs.version }}
+    
       - name: Build java Project
         if: ${{ steps.config.outputs.language == 'java' }}
         uses: gitpranay5/tm-reusable/actions/general-java-build@feat
         with:
+          java_version: ${{ steps.config.outputs.version }}
           project_dir: ${{ steps.config.outputs.project_dir }}
           build_file: ${{ steps.config.outputs.build_file }}
 
@@ -72,6 +69,7 @@ jobs:
         if: ${{ steps.config.outputs.language == 'python' }}
         uses: gitpranay5/tm-reusable/actions/general-python-build@feat
         with:
+          python_version: ${{ steps.config.outputs.version }}
           project_dir: ${{ steps.config.outputs.project_dir }}
           build_file: ${{ steps.config.outputs.build_file }}
 
@@ -79,5 +77,6 @@ jobs:
         if: ${{ steps.config.outputs.language == 'node.js' }}
         uses: gitpranay5/tm-reusable/actions/general-node-build@feat
         with:
+          node_version: ${{ steps.config.outputs.version }}
           project_dir: ${{ steps.config.outputs.project_dir }}
           build_file: ${{ steps.config.outputs.build_file }}

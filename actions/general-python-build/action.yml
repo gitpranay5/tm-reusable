@@ -5,6 +5,9 @@ name: Build Python Project general
 description: 'Composite action for building Python project with dir name and file names'
 
 inputs:
+  python_version:
+    description: 'The version of Python to use'
+    required: true
   project_dir:
     description: 'The directory containing the Python project source'
     required: true
@@ -23,7 +26,12 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python_version }}
+
     - name: Build Python application
       shell: bash
       run: |

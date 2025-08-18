@@ -4,6 +4,9 @@ name: Build Node.js Project
 description: 'Composite action for building Node.js projects'
 
 inputs:
+  node_version:
+    description: 'The version of Node.js to use'
+    required: true
   project_dir:
     description: 'The directory containing the Node.js project source'
     required: true
@@ -23,6 +26,11 @@ runs:
       with:
         fetch-depth: 0
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node_version }}
+
     - name: Build project
       shell: bash
       run: |
@@ -30,6 +38,7 @@ runs:
         if [ "${{ inputs.build_file }}" == "package.json" ]; then
           npm install
           npm run build
+          npm start
         else
           echo "No valid project file found"
           exit 1

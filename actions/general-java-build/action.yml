@@ -5,6 +5,9 @@ name: Build Java Project general
 description: 'Composite action for building Java project with dir name and file names'
 
 inputs:
+  java_version:
+    description: 'The version of Java to use'
+    required: true
   distribution:
     description: 'The distribution of the Java application'
     required: false
@@ -27,7 +30,13 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
+
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java_version }}
+        distribution: ${{ inputs.distribution }}
+
     - name: Build Java application
       shell: bash
       run: |
