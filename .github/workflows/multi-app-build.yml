@@ -49,7 +49,7 @@ jobs:
             echo "c_services=$changed_services"
             echo "c_services=$changed_services" >> $GITHUB_OUTPUT
           else
-            echo "c_services=[]" >> $GITHUB_OUTPUT
+            echo "c_services=${{ steps.extract.outputs.services }}" >> $GITHUB_OUTPUT
           fi
 
 
