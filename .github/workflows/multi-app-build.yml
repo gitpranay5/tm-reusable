@@ -13,7 +13,7 @@ jobs:
   get-services:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.extract.outputs.services }}
+      c_services: ${{ steps.extract.outputs.services }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,6 +31,33 @@ jobs:
           services=$(yq e '.services | keys' ${{ inputs.service_config_file }} | yq e -o=json - | tr -d '\n')
           echo "services=$services"
           echo "services=$services" >> $GITHUB_OUTPUT
+      
+      - name: Detect changed or new services
+        id: detect
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "service-config.yml"; then
+
+            git show HEAD~1:service-config.yml > old.yml || echo "{}" > old.yml
+            git show HEAD:service-config.yml > new.yml
+
+            # Use yq to find added/changed services
+            services=$(yq -r '
+              .services
+              | to_entries
+              | map(
+                  select(
+                    (.key as $k | .value) != (input.services[$k] // null)
+                  )
+                  | .key
+                )
+              | @json
+            ' new.yml old.yml)
+
+            echo "c_services=$services" >> $GITHUB_OUTPUT
+          else
+            echo "c_services=${{ steps.extract.outputs.services }}" >> $GITHUB_OUTPUT
+          fi
+
 
   # 2. Matrix build based on extracted service list and build for the services
   get-service-values-build:
@@ -43,7 +70,7 @@ jobs:
       build_file: ${{ steps.config.outputs.build_file }}
     strategy:
       matrix:
-        service: ${{ fromJSON(needs.get-services.outputs.services) }}
+        service: ${{ fromJSON(needs.get-services.outputs.c_services) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
