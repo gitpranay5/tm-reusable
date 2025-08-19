@@ -35,12 +35,17 @@ jobs:
       - name: Detect changed or new services
         id: detect
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q "service-config.yml"; then
-            # Extract changed lines from the diff
-            changed=$(git diff HEAD~1 HEAD -- service-config.yml | grep '^[+-]' | grep -v '^[+-]\s*#' || true)
+          if git diff --name-only HEAD~1 HEAD -- service-config.yml | grep -q .; then
+            # Get the *whole services section* from both commits
+            old=$(git show HEAD~1:service-config.yml | yq -o=json '.services')
+            new=$(git show HEAD:service-config.yml | yq -o=json '.services')
 
-            # From those lines, extract the service keys
-            services=$(echo "$changed" | grep '^[+-]\s*[a-zA-Z0-9_-]\+:' | sed 's/^[+-]\s*//' | cut -d: -f1 | sort -u | jq -R -s -c 'split("\n")[:-1]')
+            # Compare and extract only changed service names
+            services=$(diff <(echo "$old") <(echo "$new") \
+              | grep '^[<>]' \
+              | jq -r 'keys[]' 2>/dev/null \
+              | sort -u \
+              | jq -R -s -c 'split("\n")[:-1]')
 
             echo "c_services=$services" >> $GITHUB_OUTPUT
           else
