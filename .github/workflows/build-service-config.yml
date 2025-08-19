@@ -37,6 +37,6 @@ jobs:
             - name: Build applications
               uses: gitpranay5/tm-reusable/actions/general-java-build@feat
               with:
-                version: ${{ needs.get-values-configfile.outputs.version }}
+                java_version: ${{ needs.get-values-configfile.outputs.version }}
                 project_dir: ${{ needs.get-values-configfile.outputs.project_dir }}
-                project_file: ${{ needs.get-values-configfile.outputs.build_file }}
+                build_file: ${{ needs.get-values-configfile.outputs.build_file }}

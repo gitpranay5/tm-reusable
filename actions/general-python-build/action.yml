@@ -14,10 +14,6 @@ inputs:
   build_file:
     description: 'The main project file (pom.xml or build.gradle or others)'
     required: true
-  cache:
-    description: 'Enable caching for Python dependencies'
-    required: false
-    default: 'pip'
 
 runs:
   using: 'composite'
@@ -31,6 +27,14 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python_version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Build Python application
       shell: bash

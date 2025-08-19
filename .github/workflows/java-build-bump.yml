@@ -53,10 +53,6 @@ jobs:
               with:
                 repository: gitpranay5/tm-reusable
                 ref: feat
-            - name: Setup Maven
-              uses: gitpranay5/tm-reusable/actions/setup-java-for-maven@feat
-              with:
-                version: ${{ inputs.version }}
 
             - name: Get current version from pom.xml
               id: get-version
@@ -82,11 +78,11 @@ jobs:
           #       ${{ runner.os }}-maven-
 
             - name: Build Java application
-              uses: gitpranay5/tm-reusable/actions/build-java-general@feat
+              uses: gitpranay5/tm-reusable/actions/general-java-build@feat
               with:
-                version: ${{ inputs.version }}
+                java_version: ${{ inputs.version }}
                 project_dir: ${{ needs.get-dir-files.outputs.project_dir }}
-                project_file: ${{ needs.get-dir-files.outputs.project_file }}
+                build_file: ${{ needs.get-dir-files.outputs.project_file }}
 
             - name: Upload Java artifacts
               uses: actions/upload-artifact@v4
@@ -105,10 +101,6 @@ jobs:
               with:
                 repository: gitpranay5/tm-reusable
                 ref: feat
-            - name: Setup Maven
-              uses: gitpranay5/tm-reusable/actions/setup-java-for-maven@feat
-              with:
-                version: ${{ inputs.version }}
 
             - name: Bump version in pom.xml
               id: bump-version
