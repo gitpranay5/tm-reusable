@@ -39,11 +39,26 @@ jobs:
 
             # Compare and extract only changed service names
             services=$(git diff HEAD~1 HEAD -- service-config.yml \
-              | yq -p=diff -o=json '.' \
-              | jq -r '.[] | select(.path | startswith("services.")) | .path' \
-              | cut -d. -f2 \
+              | grep '^[+-]' \
+              | grep -v '^[+-]\s*#' \
+              | awk '
+                /^[+-]?services:/ { in_services=1; next }
+
+                # Match service definitions (line starts with +/- and two spaces, then key ending with colon)
+                in_services && match($0, /^[+-]\s{2}([a-zA-Z0-9_-]+):/, m) {
+                  current_service=m[1]
+                  print current_service
+                  next
+                }
+
+                # Match property change under a service (starts with +/- and 4 spaces)
+                in_services && /^[+-]\s{4}/ && current_service != "" {
+                  print current_service
+                }
+              ' \
               | sort -u \
               | jq -R -s -c 'split("\n")[:-1]')
+
             echo "c_services=$services"
             echo "c_services=$services" >> $GITHUB_OUTPUT
           else
