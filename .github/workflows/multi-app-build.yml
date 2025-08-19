@@ -36,17 +36,15 @@ jobs:
         id: detect
         run: |
           if git diff --name-only HEAD~1 HEAD -- service-config.yml | grep -q .; then
-            # Get the *whole services section* from both commits
-            old=$(git show HEAD~1:service-config.yml | yq -o=json '.services')
-            new=$(git show HEAD:service-config.yml | yq -o=json '.services')
 
             # Compare and extract only changed service names
-            services=$(diff <(echo "$old") <(echo "$new") \
-              | grep '^[<>]' \
-              | jq -r 'keys[]' 2>/dev/null \
+            services=$(git diff HEAD~1 HEAD -- service-config.yml \
+              | yq -p=diff -o=json '.' \
+              | jq -r '.[] | select(.path | startswith("services.")) | .path' \
+              | cut -d. -f2 \
               | sort -u \
               | jq -R -s -c 'split("\n")[:-1]')
-
+            echo "c_services=$services"
             echo "c_services=$services" >> $GITHUB_OUTPUT
           else
             echo "c_services=${{ steps.extract.outputs.services }}" >> $GITHUB_OUTPUT
